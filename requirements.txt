@@ -1,0 +1,7 @@
+# Gemini AI Test Application Dependencies
+
+# Google Generative AI SDK for Gemini API
+google-genai>=0.6.0
+
+# Optional: For better environment variable management
+python-dotenv>=1.0.0
