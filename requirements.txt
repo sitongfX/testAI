@@ -1,0 +1,10 @@
+# Gemini AI Question-Answering Web App Dependencies
+
+# Flask web framework
+Flask>=3.0.0
+
+# Google Generative AI SDK for Gemini API
+google-genai>=0.6.0
+
+# Optional: For better environment variable management
+python-dotenv>=1.0.0
