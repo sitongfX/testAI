@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI - Question Answering</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header .emoji {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .question-form {
+            margin-bottom: 30px;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 15px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .question-input::placeholder {
+            color: #999;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-weight: 600;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: #667eea;
+        }
+
+        .loading .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .answer-section {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .answer-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .question-display {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #555;
+            border-left: 3px solid #667eea;
+        }
+
+        .answer-text {
+            color: #333;
+            line-height: 1.8;
+            font-size: 16px;
+            white-space: pre-wrap;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 5px solid #c33;
+            display: none;
+        }
+
+        .ask-another {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .ask-another button {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ask-another button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .question-input {
+                min-height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="emoji">🤖</span>
+            <h1>Gemini AI Assistant</h1>
+            <p>Ask me anything! I'm powered by Google's Gemini AI and ready to help with your questions.</p>
+        </div>
+
+        <form class="question-form" id="questionForm">
+            <textarea 
+                class="question-input" 
+                id="questionInput" 
+                placeholder="What would you like to know? Ask me about science, technology, history, cooking, or anything else you're curious about..."
+                required
+            ></textarea>
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Ask Gemini AI ✨
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Gemini is thinking... 🤔</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="answer-section" id="answerSection">
+            <h3>💡 Your Question:</h3>
+            <div class="question-display" id="questionDisplay"></div>
+            
+            <h3>🤖 Gemini's Answer:</h3>
+            <div class="answer-text" id="answerText"></div>
+            
+            <div class="ask-another">
+                <button type="button" onclick="askAnother()">Ask Another Question</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('questionForm');
+        const questionInput = document.getElementById('questionInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const answerSection = document.getElementById('answerSection');
+        const questionDisplay = document.getElementById('questionDisplay');
+        const answerText = document.getElementById('answerText');
+        const errorMessage = document.getElementById('errorMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Asking...';
+            loading.style.display = 'block';
+            answerSection.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Show answer
+                    questionDisplay.textContent = data.question;
+                    answerText.textContent = data.answer;
+                    answerSection.style.display = 'block';
+                    
+                    // Scroll to answer
+                    answerSection.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    // Show error
+                    errorMessage.textContent = data.error;
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Network error. Please check your connection and try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Reset UI
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Ask Gemini AI ✨';
+            }
+        });
+
+        function askAnother() {
+            answerSection.style.display = 'none';
+            errorMessage.style.display = 'none';
+            questionInput.value = '';
+            questionInput.focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Auto-focus the input
+        questionInput.focus();
+    </script>
+</body>
+</html>
